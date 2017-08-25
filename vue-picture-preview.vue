@@ -1,19 +1,16 @@
 <template>
     <transition name="fade">
-      <v-touch class="lg-preview-wrapper" v-show="preview.show"
-               @click="leave" v-on:swipeleft="nextAction"
-               v-on:swiperight="preAction"
-      >
+      <v-touch class="lg-preview-wrapper" v-show="preview.show" v-on:swipeleft="nextAction" v-on:swiperight="preAction" v-on:tap="leave">
           <div class="lg-preview-loading" v-show="preview.loading"><div></div></div>
           <img
-              class="lg-preview-img"
-              v-if="preview.current.src"
-              :src="preview.current.src"
-              :alt="preview.current.title"
-              v-show="!preview.loading"
+            class="lg-preview-img"
+            v-if="preview.current.src"
+            :src="preview.current.src"
+            :alt="preview.current.title"
+            v-show="!preview.loading"
           >
           <div class="lg-preview-title" v-if="preview.isTitleEnable&&preview.current.title" v-show="!preview.loading">
-              {{preview.current.title}}
+            {{preview.current.title}}
           </div>
           <div class="lg-preview-nav-left" v-if="preview.isHorizontalNavEnable">
               <span class="lg-preview-nav-arrow" @click="preAction" ></span>
@@ -38,13 +35,6 @@
       }
     },
     watch: {
-      preview: {
-        handler (val) {
-          console.log(`需要导航：${val.isHorizontalNavEnable}`)
-          console.log(`loading：${val.loading}`)
-        },
-        deep: true
-      }
     },
     methods: {
       leave (e) {
@@ -99,6 +89,11 @@
 }
 .fade-enter, .fade-leave-active {
   opacity: 0
+}
+
+.touch-box {
+  width: auto;
+  height: auto;
 }
 
 .lg-preview-wrapper {
