@@ -1,80 +1,86 @@
 <template>
     <transition name="fade">
-    <div class="lg-preview-wrapper" v-show="preview.show" @click="leave"> 
-        <div class="lg-preview-loading" v-show="preview.loading"><div></div></div>
-        <img 
-            class="lg-preview-img" 
-            v-if="preview.current.src" 
+      <v-touch class="lg-preview-wrapper" v-show="preview.show" v-on:swipeleft="nextAction" v-on:swiperight="preAction" v-on:tap="leave">
+          <div class="lg-preview-loading" v-show="preview.loading"><div></div></div>
+          <img
+            class="lg-preview-img"
+            v-if="preview.current.src"
             :src="preview.current.src"
             :alt="preview.current.title"
             v-show="!preview.loading"
-        >
-        <div class="lg-preview-title" v-if="preview.isTitleEnable&&preview.current.title" v-show="!preview.loading">
+          >
+          <div class="lg-preview-title" v-if="preview.isTitleEnable&&preview.current.title" v-show="!preview.loading">
             {{preview.current.title}}
-        </div>
-        <div class="lg-preview-nav-left" v-if="preview.isHorizontalNavEnable" v-show="!preview.loading">
-            <span class="lg-preview-nav-arrow" @click="preAction" ></span>
-        </div>
-        <div class="lg-preview-nav-right" v-if="preview.isHorizontalNavEnable" v-show="!preview.loading">
-            <span class="lg-preview-nav-arrow" @click="nextAction"></span>
-        </div>
-    </div>
+          </div>
+          <div class="lg-preview-nav-left" v-if="preview.isHorizontalNavEnable">
+              <span class="lg-preview-nav-arrow" @click="preAction" ></span>
+          </div>
+          <div class="lg-preview-nav-right" v-if="preview.isHorizontalNavEnable">
+              <span class="lg-preview-nav-arrow" @click="nextAction"></span>
+          </div>
+      </v-touch>
     </transition>
 </template>
 
 <script>
-export default {
+  import Vue from 'vue'
+  var VueTouch = require('vue-touch')
+  Vue.use(VueTouch, {name: 'v-touch'})
+
+  export default {
     name: 'Preview',
     computed: {
-        preview () {
-            return window.LOGIC_EVENT_BUS.LOGIC_PREVIEW
-        }
+      preview () {
+        return window.LOGIC_EVENT_BUS.LOGIC_PREVIEW
+      }
+    },
+    watch: {
     },
     methods: {
-        leave (e) {
-            if ((this.preview.show)&&(e.target.className.indexOf('lg-preview-nav-arrow') != 0)){
-               this.close() 
-            }
-        },
-        close () {
-            this.preview.show = false
-        },
-        preAction () {
-            this.preview.loading = true
-            let index = this.preview.list.indexOf(this.preview.current)
-            if (index === 0) {
-                this.preview.loading = false
-                return 
-            }
-            index--
-            this.preview.current = this.preview.list[index]
-            const img = new window.Image()
-            img.src = this.preview.current.src
-            img.onload = function () {
-                setTimeout(() => {
-                    LOGIC_EVENT_BUS.LOGIC_PREVIEW.loading = false
-                },500)
-            }
-        },
-        nextAction () {
-            this.preview.loading = true
-            let index = this.preview.list.indexOf(this.preview.current)
-            if (index === this.preview.list.length - 1) {
-                this.preview.loading = false
-                return 
-            }
-            index++
-            this.preview.current = this.preview.list[index]
-            const img = new window.Image()
-            img.src = this.preview.current.src
-            img.onload = function () {
-                setTimeout(() => {
-                    LOGIC_EVENT_BUS.LOGIC_PREVIEW.loading = false
-                },500)
-            }
-        },
+      leave (e) {
+        if ((this.preview.show) && (e.target.className.indexOf('lg-preview-nav-arrow') !== 0)) {
+          this.close()
+        }
+      },
+      close () {
+        this.preview.show = false
+      },
+      preAction () {
+        this.preview.loading = true
+        let index = this.preview.list.indexOf(this.preview.current)
+        if (index === 0) {
+          this.preview.loading = false
+          return
+        }
+        index--
+        this.preview.current = this.preview.list[index]
+        const img = new window.Image()
+        img.src = this.preview.current.src
+        img.onload = function () {
+          setTimeout(() => {
+            window.LOGIC_EVENT_BUS.LOGIC_PREVIEW.loading = false
+          }, 500)
+        }
+      },
+      nextAction () {
+        this.preview.loading = true
+        let index = this.preview.list.indexOf(this.preview.current)
+        if (index === this.preview.list.length - 1) {
+          this.preview.loading = false
+          return
+        }
+        index++
+        this.preview.current = this.preview.list[index]
+        const img = new window.Image()
+        img.src = this.preview.current.src
+        img.onload = function () {
+          setTimeout(() => {
+            window.LOGIC_EVENT_BUS.LOGIC_PREVIEW.loading = false
+          }, 500)
+        }
+      }
     }
-}
+  }
 </script>
 
 <style scoped>
@@ -85,8 +91,15 @@ export default {
   opacity: 0
 }
 
+.touch-box {
+  width: auto;
+  height: auto;
+}
+
 .lg-preview-wrapper {
     position: fixed;
+    top:0;
+    left:0;
     width: 100%;
     height: 100%;
     text-align: center;
@@ -96,16 +109,16 @@ export default {
 }
 
 .lg-preview-loading {
-    position: absolute;
-    top: 45%;
-    left: 50%;
-    margin-left: -7.5px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  margin-top: -25px;
+  margin-left: -25px;
 }
 
 .lg-preview-loading > div {
-  background-color: #fff;
-  width: 15px;
-  height: 15px;
   border-radius: 100%;
   margin: 2px;
   -webkit-animation-fill-mode: both;
@@ -114,10 +127,11 @@ export default {
   border-bottom-color: transparent;
   height: 25px;
   width: 25px;
-  background: transparent !important;
+  background: transparent;
   display: inline-block;
   -webkit-animation: rotate 0.75s 0s linear infinite;
-          animation: rotate 0.75s 0s linear infinite; }
+          animation: rotate 0.75s 0s linear infinite;
+}
 
 @keyframes rotate {
   0% {
@@ -130,7 +144,7 @@ export default {
 
   100% {
     -webkit-transform: rotate(360deg) scale(1);
-            transform: rotate(360deg) scale(1); } 
+            transform: rotate(360deg) scale(1); }
 }
 
 .lg-preview-img {
@@ -146,28 +160,22 @@ export default {
 }
 
 .lg-preview-nav-arrow {
-    font-size: 3rem;
     position: absolute;
+    right: 0;
     top: 50%;
-    margin-top: -2.5rem;
-    padding: 0 .5rem;
-    background: rgba(0, 0, 0, 0);
-    line-height: 2rem;
-    border-radius: .2rem;
-
-    width: 20px;
-    height: 20px;
-    border-top: 2px solid #fff;
-    border-left: 2px solid #fff;
-    
+    width: 50px;
+    height: 50px;
+    margin-top: -40px;
+    display: block;
+    border-top: 1px solid #fff;
+    border-right: 1px solid #fff;
 }
 
 .lg-preview-nav-left,
 .lg-preview-nav-right {
     position: absolute;
     height: 100%;
-    margin: .25rem;
-    width: 10rem;
+    width: 50%;
     top: 0;
     color: #fff;
     transition: opacity .2s;
@@ -184,8 +192,8 @@ export default {
 }
 .lg-preview-nav-left .lg-preview-nav-arrow {
     left: 0;
-    margin-left: 2rem;
-    transform:rotate(-45deg);
+    margin-left: 100px;
+    transform:rotate(-135deg);
 }
 
 .lg-preview-nav-right {
@@ -194,8 +202,8 @@ export default {
 
 .lg-preview-nav-right .lg-preview-nav-arrow {
     right: 0;
-    margin-right: 2rem;
-    transform:rotate(135deg);
+    margin-right: 100px;
+    transform:rotate(45deg);
 }
 
 .lg-preview-title {
@@ -211,19 +219,4 @@ export default {
     line-height: 2rem;
 }
 
-@media all and (max-width: 768px) {
-    .lg-preview-nav-left,
-    .lg-preview-nav-right {
-        width: 5rem;
-    }
-    .lg-preview-nav-arrow {
-        font-size: 2.5rem;
-    }
-    .lg-preview-nav-left .lg-preview-nav-arrow {
-        margin-left: 1rem;
-    }
-    .lg-preview-nav-right .lg-preview-nav-arrow {
-        margin-right: 1rem;
-    }
-}
 </style>
